@@ -32,18 +32,18 @@ echo
 # coment this out if the original data are not in the nifty format
 echo copydata
 cp $func_data .
-cp $func_data ./filtered_func_data.nii.gz #it's call like this because FIX require it
+cp $func_data ./func.nii.gz
 cp $t1_data ./T1.nii.gz
 echo
 
 
 echo melodic on raw data
 # Do Single Subject ICA (melodic)
-# infile: ${SUBJID}_func.nii.gz
+# infile: func_data.nii.gz
 # outfile: filtered_func_data.ica
 
 # don't run melodic if file doesn't exist
-melodic_in=filtered_func_data.nii.gz
+melodic_in=func_data.nii.gz
 if [ ! -f $melodic_in ]; then
     echo "input file doesn't exist. Exit."
     exit
@@ -53,21 +53,21 @@ fi
 
 echo get_example 
 # Get example_func - i.e. middle volume
-# infile: ${SUBJID}_func
+# infile: func
 # outfile: example_func
-all_vol=`${FSLBIN}/fslinfo ${SUBJID}_func.nii.gz  | grep dim4 | head -n 1 | awk '{print $2}'`
+all_vol=`${FSLBIN}/fslinfo func.nii.gz  | grep dim4 | head -n 1 | awk '{print $2}'`
 all_vol=${all_vol}
 middle_vol=`echo $all_vol / 2 | bc`
-${FSLBIN}/fslroi ${SUBJID}_func example_func ${middle_vol} 1
+${FSLBIN}/fslroi func example_func ${middle_vol} 1
 echo
 
 
 echo motioncorrection_for_fix
 # Do motion correction to get motion parameter file for FIX mc/prefiltered_func_data_mcf.par
 # other files from this steps will not be used
-# infile: ${SUBJID}_func
+# infile: func
 # outfile: mc/prefiltered_func_data_mcf.par
-${FSLBIN}/mcflirt -in ${SUBJID}_func -out prefiltered_func_data_mcf -mats -plots -reffile example_func -rmsrel -rmsabs -stats
+${FSLBIN}/mcflirt -in func -out prefiltered_func_data_mcf -mats -plots -reffile example_func -rmsrel -rmsabs -stats
 mkdir mc
 mv prefiltered_func_data_mcf* mc/.
 echo
@@ -75,8 +75,8 @@ echo
 
 echo skullstrip_fsl 
 # Masking Skull from Image, a.k.a. skullstripping
-# infile: ${SUBJID}_denoised_mc_aggr.nii.gz
-# outfile: ${SUBJID}_func_ss.nii.gz
+# infile: mc/prefiltered_func_data_mcf.nii.gz
+# outfile: func_ss.nii.gz
 
 # 1. Create mean image
 # infile: mc/prefiltered_func_data_mcf.nii.gz
@@ -114,8 +114,8 @@ echo
 
 echo register_T1_to_MNI
 # warp T1 to MNI
-# infile: ${SUBJID}_highres
-# outfile: ${SUBJID}_T1_to_MNI_2mm.nii.gz
+# infile: highres
+# outfile: T1_to_MNI_2mm.nii.gz
 
 # 1. linear preregistration
 # infile: highres.nii.gz
@@ -131,8 +131,8 @@ echo
 
 echo bbreg 
 # Do boundary based registration of functional to T1
-# infile: ${SUBJID}_example_func_ns
-# outdir: ${SUBJID}_reg
+# infile: example_func_ns
+# outdir: reg
 # Avoid weird cluster error
 mkdir reg
 mv example_func_ns.nii.gz reg/example_func_ns.nii.gz
