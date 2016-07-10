@@ -25,7 +25,7 @@ cd $SUBJID
 #coment this out if the data are allready in nifty format
 echo convert_to_nii
 # convert epi and T1 to nii files
-#mri_convert -i $func_data -it img -ot nii -o filtered_func_data.nii.gz
+#mri_convert -i $func_data -it img -ot nii -o func.nii.gz
 #mri_convert -i $t1_data -it img -ot nii -o T1.nii.gz  
 echo
 
@@ -43,7 +43,7 @@ echo melodic on raw data
 # outfile: filtered_func_data.ica
 
 # don't run melodic if file doesn't exist
-melodic_in=func_data.nii.gz
+melodic_in=func.nii.gz
 if [ ! -f $melodic_in ]; then
     echo "input file doesn't exist. Exit."
     exit
@@ -150,7 +150,7 @@ ${FSLBIN}/applywarp -i mask.nii.gz -o mask_highres.nii.gz -r fmri_example_func_n
 ${FSLBIN}/applywarp -i mean_func.nii.gz -o mean_func_highres.nii.gz -r fmri_example_func_ns2highres.nii.gz --premat=fmri_example_func_ns2highres.mat
 
 mkdir 1st_cleaning
-mv filtered_func_data.nii.gz 1st_cleaning/.
+mv func_data.nii.gz 1st_cleaning/.
 mv filtered_func_data.ica 1st_cleaning/.
 mv $(pwd)/mc 1st_cleaning/.
 ln $(pwd)/mask.nii.gz 1st_cleaning/.                       
