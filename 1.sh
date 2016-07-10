@@ -146,11 +146,11 @@ ${FSLBIN}/convert_xfm -omat reg/fMRI_example_func_ns.mat -inverse reg/fMRI_examp
 mv reg/fMRI_example_func_ns.mat reg/highres2example_func.mat
 
 echo register mask and mean img
-${FSLBIN}/applywarp -i mask.nii.gz -o mask_highres.nii.gz -r fmri_example_func_ns2highres.nii.gz --premat=fmri_example_func_ns2highres.mat
-${FSLBIN}/applywarp -i mean_func.nii.gz -o mean_func_highres.nii.gz -r fmri_example_func_ns2highres.nii.gz --premat=fmri_example_func_ns2highres.mat
+${FSLBIN}/applywarp -i mask.nii.gz -o reg/mask_highres.nii.gz -r reg/fMRI_example_func_ns2highres.nii.gz --premat=reg/fMRI_example_func_ns2highres.mat
+${FSLBIN}/applywarp -i mean_func.nii.gz -o reg/mean_func_highres.nii.gz -r reg/fMRI_example_func_ns2highres.nii.gz --premat=reg/fMRI_example_func_ns2highres.mat
 
 mkdir 1st_cleaning
-mv func_data.nii.gz 1st_cleaning/.
+mv func.nii.gz 1st_cleaning/filtered_func_data.nii.gz
 mv filtered_func_data.ica 1st_cleaning/.
 mv $(pwd)/mc 1st_cleaning/.
 ln $(pwd)/mask.nii.gz 1st_cleaning/.                       
