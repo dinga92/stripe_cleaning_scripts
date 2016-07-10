@@ -48,7 +48,7 @@ if [ ! -f $melodic_in ]; then
     echo "input file doesn't exist. Exit."
     exit
 fi
-${FSLBIN}/melodic --in=$melodic_in --outdir=filtered_func_data.ica --nobet --mmthresh=0.5 --report --tr=${TR} --Oall
+#${FSLBIN}/melodic --in=$melodic_in --outdir=filtered_func_data.ica --nobet --mmthresh=0.5 --report --tr=${TR} --Oall
 
 
 echo get_example 
@@ -145,12 +145,16 @@ ${FSLBIN}/epi_reg --epi=reg/example_func_ns.nii.gz --t1=${SUBJID}_T1.nii.gz --t1
 ${FSLBIN}/convert_xfm -omat reg/fMRI_example_func_ns.mat -inverse reg/fMRI_example_func_ns2highres.mat
 mv reg/fMRI_example_func_ns.mat reg/highres2example_func.mat
 
+echo register mask and mean img
+${FSLBIN}/applywarp -i mask.nii.gz -o mask_highres.nii.gz -r fmri_example_func_ns2highres.nii.gz --premat=fmri_example_func_ns2highres.mat
+${FSLBIN}/applywarp -i mean_func.nii.gz -o mean_func_highres.nii.gz -r fmri_example_func_ns2highres.nii.gz --premat=fmri_example_func_ns2highres.mat
+
 mkdir 1st_cleaning
 mv filtered_func_data.nii.gz 1st_cleaning/.
 mv filtered_func_data.ica 1st_cleaning/.
 mv $(pwd)/mc 1st_cleaning/.
 ln $(pwd)/mask.nii.gz 1st_cleaning/.                       
-mv  mean_func.nii.gz 1st_cleaning/.                   
+ln -s $(pwd)/mean_func.nii.gz 1st_cleaning/.                   
 ln -s $(pwd)/reg 1st_cleaning/.
 
 
