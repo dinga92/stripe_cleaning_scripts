@@ -25,15 +25,15 @@ cd $SUBJID
 #coment this out if the data are allready in nifty format
 echo convert_to_nii
 # convert epi and T1 to nii files
-#mri_convert -i $func_data -it img -ot nii -o ${SUBJID}_T1.nii.gz  
-#mri_convert -i $t1_data -it img -ot nii -o ${SUBJID}_func.nii.gz  
+#mri_convert -i $func_data -it img -ot nii -o filtered_func_data.nii.gz
+#mri_convert -i $t1_data -it img -ot nii -o T1.nii.gz  
 echo
 
 # coment this out if the original data are not in the nifty format
 echo copydata
 cp $func_data .
-cp $func_data ./filtered_func_data.nii.gz
-cp $t1_data .
+cp $func_data ./filtered_func_data.nii.gz #it's call like this because FIX require it
+cp $t1_data ./T1.nii.gz
 echo
 
 
@@ -43,7 +43,7 @@ echo melodic on raw data
 # outfile: filtered_func_data.ica
 
 # don't run melodic if file doesn't exist
-melodic_in=${SUBJID}_func.nii.gz
+melodic_in=filtered_func_data.nii.gz
 if [ ! -f $melodic_in ]; then
     echo "input file doesn't exist. Exit."
     exit
@@ -106,9 +106,9 @@ echo
 
 echo bet_T1
 # Skullstrip T1
-# infile: ${SUBJID}_T1.nii.gz
+# infile: T1.nii.gz
 # outfile: highres
-${FSLBIN}/bet ${SUBJID}_T1.nii.gz highres  -f 0.5 -g 0
+${FSLBIN}/bet T1.nii.gz highres  -f 0.5 -g 0
 echo
 
 
@@ -123,9 +123,9 @@ echo register_T1_to_MNI
 ${FSLBIN}/flirt -ref ${FSLDIR}/data/standard/MNI152_T1_2mm_brain -in highres.nii.gz -omat T1_affine_transf.mat
 
 # 2. nonlinear registration
-# infile: ${SUBJID}_T1.nii.gz
-# outfile: ${SUBJID}_T1_to_MNI_2mm.nii.gz
-${FSLBIN}/fnirt --in=${SUBJID}_T1.nii.gz --aff=T1_affine_transf.mat --cout=T1_nonlinear_transf --iout=T1_to_MNI_2mm.nii.gz --config=T1_2_MNI152_2mm
+# infile: T1.nii.gz
+# outfile: T1_to_MNI_2mm.nii.gz
+${FSLBIN}/fnirt --in=T1.nii.gz --aff=T1_affine_transf.mat --cout=T1_nonlinear_transf --iout=T1_to_MNI_2mm.nii.gz --config=T1_2_MNI152_2mm
 echo
 
 
@@ -139,7 +139,7 @@ mv example_func_ns.nii.gz reg/example_func_ns.nii.gz
 mv highres.nii.gz reg/highres.nii.gz
 mv example_func.nii.gz reg/.
 ## Execute epi_reg
-${FSLBIN}/epi_reg --epi=reg/example_func_ns.nii.gz --t1=${SUBJID}_T1.nii.gz --t1brain=reg/highres.nii.gz --out=reg/fMRI_example_func_ns2highres
+${FSLBIN}/epi_reg --epi=reg/example_func_ns.nii.gz --t1=T1.nii.gz --t1brain=reg/highres.nii.gz --out=reg/fMRI_example_func_ns2highres
 
 ## Calculate inverse transformation matrix
 ${FSLBIN}/convert_xfm -omat reg/fMRI_example_func_ns.mat -inverse reg/fMRI_example_func_ns2highres.mat
