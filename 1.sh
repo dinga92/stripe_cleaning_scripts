@@ -149,6 +149,9 @@ echo register mask and mean img
 ${FSLBIN}/applywarp -i mask.nii.gz -o reg/mask_highres.nii.gz -r reg/fMRI_example_func_ns2highres.nii.gz --premat=reg/fMRI_example_func_ns2highres.mat
 ${FSLBIN}/applywarp -i mean_func.nii.gz -o reg/mean_func_highres.nii.gz -r reg/fMRI_example_func_ns2highres.nii.gz --premat=reg/fMRI_example_func_ns2highres.mat
 
+${FSLBIN}/applywarp --ref=${FSLDIR}/data/standard/MNI152_T1_2mm --in=mask.nii.gz --warp=T1_nonlinear_transf.nii.gz --premat=reg/fMRI_example_func_ns2highres.mat --out=reg/func_mask_mni.nii.gz
+${FSLBIN}/applywarp --ref=${FSLDIR}/data/standard/MNI152_T1_2mm --in=mean_func.nii.gz --warp=T1_nonlinear_transf.nii.gz --premat=reg/fMRI_example_func_ns2highres.mat --out=reg/mean_func_mni.nii.gz
+
 mkdir 1st_cleaning
 mv func.nii.gz 1st_cleaning/filtered_func_data.nii.gz
 mv filtered_func_data.ica 1st_cleaning/.
