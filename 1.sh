@@ -160,6 +160,7 @@ ln $(pwd)/mask.nii.gz 1st_cleaning/.
 ln -s $(pwd)/mean_func.nii.gz 1st_cleaning/.                   
 ln -s $(pwd)/reg 1st_cleaning/.
 
+python ../make_tsnr.py func.nii.gz
 
 # run fix, create features
 $fix -f ./1st_cleaning
