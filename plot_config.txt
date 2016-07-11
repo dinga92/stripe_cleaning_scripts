@@ -1,0 +1,25 @@
+# func mask
+mean_func.nii.gz x 4 add_contours mask.nii.gz
+
+# T1
+T1.nii.gz x 4 add_contours highres_mask.nii.gz
+
+# fucn to t1
+T1.nii.gz x 4 add_contours reg/fMRI_example_func_ns2highres_fast_wmseg.nii.gz
+
+# fucn to t1
+T1.nii.gz x 4 add_contours reg/mask_highres.nii.gz
+
+# T1 to MNI
+T1_to_MNI_2mm.nii.gz x 4 add_contours /usr/share/fsl/data/standard/MNI152_T1_2mm_edges.nii.gz
+T1_to_MNI_2mm.nii.gz y 4 add_contours /usr/share/fsl/data/standard/MNI152_T1_2mm_edges.nii.gz
+T1_to_MNI_2mm.nii.gz z 4 add_contours /usr/share/fsl/data/standard/MNI152_T1_2mm_edges.nii.gz
+
+# mean func to MNI
+reg/mean_func_mni.nii.gz x 4 add_contours /usr/share/fsl/data/standard/MNI152_T1_2mm_brain_mask.nii.gz
+/usr/share/fsl/data/standard/MNI152_T1_2mm_brain.nii.gz x 4 add_contours reg/func_mask_mni.nii.gz
+
+# tsnr
+func_tsnr.nii.gz x 9 
+func_tsnr.nii.gz y 8 
+func_tsnr.nii.gz z 8
