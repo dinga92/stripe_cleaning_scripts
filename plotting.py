@@ -30,9 +30,17 @@ for line in f:
 
 
     print 'line: ', line
-    elements = line.split('add_contours')
+    #for words
+    words = ('add_contours', 'add_edges')
+    verbs = [e for e in line.split() if e in words]
+    print verbs
+    line = line.replace('add_contours', '%%%%%')
+    line = line.replace('add_edges', '%%%%%')
+    elements = line.split('%%%%%')
     print len(elements)
+
     path, display_mode, cut_coords = elements[0].split()
+
     path = opj(folder, path)
     print path, display_mode, cut_coords
 
@@ -53,8 +61,17 @@ for line in f:
     for element in elements[1:]:
         print
         path = element.split()[0]
+        path = opj(folder, path)
         print element, 'path = ', path
-        display.add_contours(path, levels=[1], colors='r')
+        #display.add_edges(path)
+        verb = verbs.pop(0)
+        print verb
+        if verb == 'add_contours':
+            display.add_contours(path, levels=[0.1], colors='r')
+        elif verb == 'add_edges':
+            display.add_edges(path)
+        else:
+            print 'error'
 
     display.savefig(opj(folder, 'qa_plots/%s.png' %i))
     i += 1
