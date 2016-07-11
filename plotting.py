@@ -4,13 +4,20 @@ import sys
 import nibabel as nb
 import numpy as np
 
+opj = os.path.join
 
 
-f = open(sys.argv[1])
+#f = open(sys.argv[1])
+#folder = '110553'
+#plot_config = 'plot_config.txt'
 
+folder = sys.argv[1]
+plot_config = sys.argv[2]
+
+f = open(plot_config)
 
 try:
-    os.mkdir('qa_plots')
+    os.mkdir(opj(folder, 'qa_plots'))
 except:
     pass
 
@@ -26,8 +33,8 @@ for line in f:
     elements = line.split('add_contours')
     print len(elements)
     path, display_mode, cut_coords = elements[0].split()
-
-    #print path, display_mode, cut_coords
+    path = opj(folder, path)
+    print path, display_mode, cut_coords
 
     data = nb.load(path).get_data().flatten()
     data = sorted(data[~np.isnan(data)])
@@ -49,7 +56,7 @@ for line in f:
         print element, 'path = ', path
         display.add_contours(path, levels=[1], colors='r')
 
-    display.savefig('qa_plots/%s.png' %i)
+    display.savefig(opj(folder, 'qa_plots/%s.png' %i))
     i += 1
 #
 #    display.add_contours(path)
@@ -57,7 +64,7 @@ f.close()
 
 num_of_images=len([f for f in os.listdir('qa_plots') if f.endswith('png')])
 
-f = open('qa_plots/index.html', 'w')
+f = open(opj(folder, 'qa_plots/index.html'), 'w')
 
 print >> f, '<HTML><HEAD><TITLE>QA plots</TITLE></HEAD><BODY>'
 for i in range(num_of_images):
