@@ -48,7 +48,7 @@ if [ ! -f $melodic_in ]; then
     echo "input file doesn't exist. Exit."
     exit
 fi
-${FSLBIN}/melodic --in=$melodic_in --outdir=filtered_func_data.ica --nobet --mmthresh=0.5 --report --tr=${TR} --Oall
+${FSLBIN}/melodic --in=$melodic_in --outdir=filtered_func_data.ica --nobet --mmthresh=0.5 --tr=${TR} --Oall
 
 
 echo get_example 
@@ -71,7 +71,8 @@ ${FSLBIN}/mcflirt -in func -out prefiltered_func_data_mcf -mats -plots -reffile 
 mkdir mc
 mv prefiltered_func_data_mcf* mc/.
 echo
-
+# remove big unnecesary files
+rm mc/prefiltered_func_data_mcf.nii.gz
 
 echo skullstrip_fsl 
 # Masking Skull from Image, a.k.a. skullstripping
