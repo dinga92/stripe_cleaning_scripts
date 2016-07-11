@@ -48,7 +48,7 @@ if [ ! -f $melodic_in ]; then
     echo "input file doesn't exist. Exit."
     exit
 fi
-#${FSLBIN}/melodic --in=$melodic_in --outdir=filtered_func_data.ica --nobet --mmthresh=0.5 --report --tr=${TR} --Oall
+${FSLBIN}/melodic --in=$melodic_in --outdir=filtered_func_data.ica --nobet --mmthresh=0.5 --report --tr=${TR} --Oall
 
 
 echo get_example 
@@ -108,7 +108,7 @@ echo bet_T1
 # Skullstrip T1
 # infile: T1.nii.gz
 # outfile: highres
-${FSLBIN}/bet T1.nii.gz highres  -f 0.5 -g 0
+${FSLBIN}/bet T1.nii.gz highres  -f 0.5 -g 0 -m
 echo
 
 
