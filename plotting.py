@@ -79,7 +79,7 @@ for line in f:
 #    display.add_contours(path)
 f.close()
 
-num_of_images=len([f for f in os.listdir('qa_plots') if f.endswith('png')])
+num_of_images=len([f for f in os.listdir(opj(folder, 'qa_plots')) if f.endswith('png')])
 
 f = open(opj(folder, 'qa_plots/index.html'), 'w')
 
