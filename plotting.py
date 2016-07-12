@@ -19,6 +19,9 @@ f = open(plot_config)
 try:
     os.mkdir(opj(folder, 'qa_plots'))
 except:
+    import shutil
+    shutil.rmtree(opj(folder, 'qa_plots'), ignore_errors=True)
+    os.mkdir(opj(folder, 'qa_plots'))
     pass
 
 i = 0
