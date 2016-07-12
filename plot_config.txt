@@ -1,3 +1,6 @@
+# plot motion
+110553/1st_cleaning/mc
+
 # func mask
 mean_func.nii.gz x 4 add_contours mask.nii.gz
 
@@ -6,6 +9,9 @@ T1.nii.gz x 4 add_contours highres_mask.nii.gz
 
 # fucn to t1
 T1.nii.gz x 4 add_contours reg/fMRI_example_func_ns2highres_fast_wmseg.nii.gz
+T1.nii.gz y 4 add_contours reg/fMRI_example_func_ns2highres_fast_wmseg.nii.gz
+T1.nii.gz z 4 add_contours reg/fMRI_example_func_ns2highres_fast_wmseg.nii.gz
+
 
 # fucn to t1
 T1.nii.gz x 4 add_contours reg/mask_highres.nii.gz
