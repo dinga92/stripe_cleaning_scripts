@@ -113,11 +113,14 @@ for line in f:
         vmax=data[int(len(data)*0.99)]
         print vmax
 
+        #title = names of plotted files
+        title = ' '.join([e.split()[0].split('/')[-1].split('.nii.gz')[0] for e in elements])
         display = plotting.plot_anat(path,
                        vmin=0,
                        vmax=vmax,
                        display_mode=display_mode,
-                       cut_coords=int(cut_coords))
+                       cut_coords=int(cut_coords),
+                       title=title)
 
         print elements
         for element in elements[1:]:
