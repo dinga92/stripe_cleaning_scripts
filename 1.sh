@@ -165,7 +165,7 @@ ln -s $(pwd)/reg 1st_cleaning/.
 python $inputDir/make_tsnr.py func.nii.gz
 
 # remove big unnecesary files
-rm mc/prefiltered_func_data_mcf.nii.gz
+rm 1st_cleaning/mc/prefiltered_func_data_mcf.nii.gz
 
 # run fix, create features
 $fix -f ./1st_cleaning
