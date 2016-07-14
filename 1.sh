@@ -6,15 +6,17 @@
 # This script run correctly if there is a fix folder in subjects directory with features.csv file
 
 #setup paths
-FSLBIN=$FSLDIR/bin
-fix=/home/dlpfc/Code/FIX/fix1.06/fix
+#FSLBIN=$FSLDIR/bin
+#fix=/home/dlpfc/Code/FIX/fix1.06/fix
 
 
 # setup variables
 SUBJID=$1
-TR=$(grep $SUBJID ./TRs.txt | awk 'NF>1{print $NF}')
-func_data=/media/dlpfc/Elements/Processing_scripts/source_data/${SUBJID}/${SUBJID}_func.nii.gz
-t1_data=/media/dlpfc/Elements/Processing_scripts/source_data/${SUBJID}/${SUBJID}_T1.nii.gz
+
+inputDir=/home/data/lschmaal/Richard/stripe_cleaning
+TR=$(grep $SUBJID $inputDir/TRs.txt | awk 'NF>1{print $NF}')
+func_data=$inputDir/source_data/${SUBJID}/${SUBJID}_func.nii.gz
+t1_data=$inputDir/source_data/${SUBJID}/${SUBJID}_T1.nii.gz
 
 
 echo $SUBJID $TR
@@ -48,17 +50,17 @@ if [ ! -f $melodic_in ]; then
     echo "input file doesn't exist. Exit."
     exit
 fi
-${FSLBIN}/melodic --in=$melodic_in --outdir=filtered_func_data.ica --nobet --mmthresh=0.5 --tr=${TR} --Oall
+melodic --in=$melodic_in --outdir=filtered_func_data.ica --nobet --mmthresh=0.5 --tr=${TR} --Oall
 
 
 echo get_example 
 # Get example_func - i.e. middle volume
 # infile: func
 # outfile: example_func
-all_vol=`${FSLBIN}/fslinfo func.nii.gz  | grep dim4 | head -n 1 | awk '{print $2}'`
+all_vol=`fslinfo func.nii.gz  | grep dim4 | head -n 1 | awk '{print $2}'`
 all_vol=${all_vol}
 middle_vol=`echo $all_vol / 2 | bc`
-${FSLBIN}/fslroi func example_func ${middle_vol} 1
+fslroi func example_func ${middle_vol} 1
 echo
 
 
@@ -67,12 +69,11 @@ echo motioncorrection_for_fix
 # other files from this steps will not be used
 # infile: func
 # outfile: mc/prefiltered_func_data_mcf.par
-${FSLBIN}/mcflirt -in func -out prefiltered_func_data_mcf -mats -plots -reffile example_func -rmsrel -rmsabs -stats
+mcflirt -in func -out prefiltered_func_data_mcf -mats -plots -reffile example_func -rmsrel -rmsabs -stats
 mkdir mc
 mv prefiltered_func_data_mcf* mc/.
 echo
-# remove big unnecesary files
-rm mc/prefiltered_func_data_mcf.nii.gz
+
 
 echo skullstrip_fsl 
 # Masking Skull from Image, a.k.a. skullstripping
@@ -82,16 +83,16 @@ echo skullstrip_fsl
 # 1. Create mean image
 # infile: mc/prefiltered_func_data_mcf.nii.gz
 # outfile: mean_func.nii.gz
-${FSLBIN}/fslmaths mc/prefiltered_func_data_mcf.nii.gz -Tmean mean_func.nii.gz
+fslmaths mc/prefiltered_func_data_mcf.nii.gz -Tmean mean_func.nii.gz
 
 # 2. Bet mean image
 # infile: mean_func.nii.gz
 # outfile:  mean_func_brain
-${FSLBIN}/bet mean_func.nii.gz mean_func_brain -f 0.5 -n -m -R
+bet mean_func.nii.gz mean_func_brain -f 0.5 -n -m -R
 # 3. Apply mask
 # infile:mc/prefiltered_func_data_mcf.nii.gz
 # outfile: func_ss.nii.gz
-${FSLBIN}/fslmaths mc/prefiltered_func_data_mcf.nii.gz -mul mean_func_brain.nii.gz func_ss.nii.gz
+fslmaths mc/prefiltered_func_data_mcf.nii.gz -mul mean_func_brain.nii.gz func_ss.nii.gz
 
 mv mean_func_brain_mask.nii.gz mask.nii.gz
 echo
@@ -101,7 +102,7 @@ echo bet_examplefunc
 # Skullstrip image
 # infile: example_func
 # outfile: example_func_ns
-${FSLBIN}/bet example_func example_func_ns -f 0.5 -n -m -R -o
+bet example_func example_func_ns -f 0.5 -n -m -R -o
 echo
 
 
@@ -109,7 +110,7 @@ echo bet_T1
 # Skullstrip T1
 # infile: T1.nii.gz
 # outfile: highres
-${FSLBIN}/bet T1.nii.gz highres  -f 0.5 -g 0 -m
+bet T1.nii.gz highres  -f 0.5 -g 0 -m
 echo
 
 
@@ -121,12 +122,12 @@ echo register_T1_to_MNI
 # 1. linear preregistration
 # infile: highres.nii.gz
 # outfile: T1_affine_transf.mat
-${FSLBIN}/flirt -ref ${FSLDIR}/data/standard/MNI152_T1_2mm_brain -in highres.nii.gz -omat T1_affine_transf.mat
+flirt -ref ${FSLDIR}/data/standard/MNI152_T1_2mm_brain -in highres.nii.gz -omat T1_affine_transf.mat
 
 # 2. nonlinear registration
 # infile: T1.nii.gz
 # outfile: T1_to_MNI_2mm.nii.gz
-${FSLBIN}/fnirt --in=T1.nii.gz --aff=T1_affine_transf.mat --cout=T1_nonlinear_transf --iout=T1_to_MNI_2mm.nii.gz --config=T1_2_MNI152_2mm
+fnirt --in=T1.nii.gz --aff=T1_affine_transf.mat --cout=T1_nonlinear_transf --iout=T1_to_MNI_2mm.nii.gz --config=T1_2_MNI152_2mm
 echo
 
 
@@ -140,18 +141,18 @@ mv example_func_ns.nii.gz reg/example_func_ns.nii.gz
 mv highres.nii.gz reg/highres.nii.gz
 mv example_func.nii.gz reg/.
 ## Execute epi_reg
-${FSLBIN}/epi_reg --epi=reg/example_func_ns.nii.gz --t1=T1.nii.gz --t1brain=reg/highres.nii.gz --out=reg/fMRI_example_func_ns2highres
+epi_reg --epi=reg/example_func_ns.nii.gz --t1=T1.nii.gz --t1brain=reg/highres.nii.gz --out=reg/fMRI_example_func_ns2highres
 
 ## Calculate inverse transformation matrix
-${FSLBIN}/convert_xfm -omat reg/fMRI_example_func_ns.mat -inverse reg/fMRI_example_func_ns2highres.mat
+convert_xfm -omat reg/fMRI_example_func_ns.mat -inverse reg/fMRI_example_func_ns2highres.mat
 mv reg/fMRI_example_func_ns.mat reg/highres2example_func.mat
 
 echo register mask and mean img
-${FSLBIN}/applywarp -i mask.nii.gz -o reg/mask_highres.nii.gz -r reg/fMRI_example_func_ns2highres.nii.gz --premat=reg/fMRI_example_func_ns2highres.mat
-${FSLBIN}/applywarp -i mean_func.nii.gz -o reg/mean_func_highres.nii.gz -r reg/fMRI_example_func_ns2highres.nii.gz --premat=reg/fMRI_example_func_ns2highres.mat
+applywarp -i mask.nii.gz -o reg/mask_highres.nii.gz -r reg/fMRI_example_func_ns2highres.nii.gz --premat=reg/fMRI_example_func_ns2highres.mat
+applywarp -i mean_func.nii.gz -o reg/mean_func_highres.nii.gz -r reg/fMRI_example_func_ns2highres.nii.gz --premat=reg/fMRI_example_func_ns2highres.mat
 
-${FSLBIN}/applywarp --ref=${FSLDIR}/data/standard/MNI152_T1_2mm --in=mask.nii.gz --warp=T1_nonlinear_transf.nii.gz --premat=reg/fMRI_example_func_ns2highres.mat --out=reg/func_mask_mni.nii.gz
-${FSLBIN}/applywarp --ref=${FSLDIR}/data/standard/MNI152_T1_2mm --in=mean_func.nii.gz --warp=T1_nonlinear_transf.nii.gz --premat=reg/fMRI_example_func_ns2highres.mat --out=reg/mean_func_mni.nii.gz
+applywarp --ref=${FSLDIR}/data/standard/MNI152_T1_2mm --in=mask.nii.gz --warp=T1_nonlinear_transf.nii.gz --premat=reg/fMRI_example_func_ns2highres.mat --out=reg/func_mask_mni.nii.gz
+applywarp --ref=${FSLDIR}/data/standard/MNI152_T1_2mm --in=mean_func.nii.gz --warp=T1_nonlinear_transf.nii.gz --premat=reg/fMRI_example_func_ns2highres.mat --out=reg/mean_func_mni.nii.gz
 
 mkdir 1st_cleaning
 mv func.nii.gz 1st_cleaning/filtered_func_data.nii.gz
@@ -162,6 +163,9 @@ ln -s $(pwd)/mean_func.nii.gz 1st_cleaning/.
 ln -s $(pwd)/reg 1st_cleaning/.
 
 python ../make_tsnr.py func.nii.gz
+
+# remove big unnecesary files
+rm mc/prefiltered_func_data_mcf.nii.gz
 
 # run fix, create features
 $fix -f ./1st_cleaning
