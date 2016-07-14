@@ -162,7 +162,7 @@ ln $(pwd)/mask.nii.gz 1st_cleaning/.
 ln -s $(pwd)/mean_func.nii.gz 1st_cleaning/.                   
 ln -s $(pwd)/reg 1st_cleaning/.
 
-python ../make_tsnr.py func.nii.gz
+python $inputDir/make_tsnr.py func.nii.gz
 
 # remove big unnecesary files
 rm mc/prefiltered_func_data_mcf.nii.gz
