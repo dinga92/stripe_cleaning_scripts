@@ -15,9 +15,10 @@ SUBJID=$1
 
 inputDir=/home/data/lschmaal/Richard/stripe_cleaning
 TR=$(grep $SUBJID $inputDir/TRs.txt | awk 'NF>1{print $NF}')
-func_data=$inputDir/source_data/${SUBJID}/${SUBJID}_func.nii.gz
-t1_data=$inputDir/source_data/${SUBJID}/${SUBJID}_T1.nii.gz
-
+#func_data=$inputDir/source_data/${SUBJID}/${SUBJID}_func.nii.gz
+#t1_data=$inputDir/source_data/${SUBJID}/${SUBJID}_T1.nii.gz
+func_data=$inputDir/links/${SUBJID}_Functional.img
+t1_data=$inputDir/links/${SUBJID}_T1.img
 
 echo $SUBJID $TR
 
@@ -27,17 +28,20 @@ cd $SUBJID
 #coment this out if the data are allready in nifty format
 echo convert_to_nii
 # convert epi and T1 to nii files
-#mri_convert -i $func_data -it img -ot nii -o func.nii.gz
-#mri_convert -i $t1_data -it img -ot nii -o T1.nii.gz  
+mri_convert -i $func_data -it img -ot nii -o func.nii.gz
+mri_convert -i $t1_data -it img -ot nii -o T1.nii.gz  
 echo
 
 # coment this out if the original data are not in the nifty format
-echo copydata
-cp $func_data .
-cp $func_data ./func.nii.gz
-cp $t1_data ./T1.nii.gz
-echo
+#echo copydata
+#cp $func_data .
+#cp $func_data ./func.nii.gz
+#cp $t1_data ./T1.nii.gz
+#echo
 
+echo create_tsnr
+python $inputDir/make_tsnr.py func.nii.gz
+echo
 
 echo melodic on raw data
 # Do Single Subject ICA (melodic)
@@ -50,8 +54,13 @@ if [ ! -f $melodic_in ]; then
     echo "input file doesn't exist. Exit."
     exit
 fi
-melodic --in=$melodic_in --outdir=filtered_func_data.ica --nobet --mmthresh=0.5 --tr=${TR} --Oall
 
+#melodic --in=$melodic_in --outdir=filtered_func_data.ica --nobet --mmthresh=0.5 --tr=${TR} --Oall
+
+# copy file instead of running melodic
+cp $inputDir/source_data/${SUBJID}_script1.tar.bz2 .
+tar -xjf ${SUBJID}_script1.tar.bz2 && rm ${SUBJID}_script1.tar.bz2
+mv ${SUBJID}_func_raw.ica filtered_func_data.ica
 
 echo get_example 
 # Get example_func - i.e. middle volume
@@ -162,10 +171,11 @@ ln $(pwd)/mask.nii.gz 1st_cleaning/.
 ln -s $(pwd)/mean_func.nii.gz 1st_cleaning/.                   
 ln -s $(pwd)/reg 1st_cleaning/.
 
-python $inputDir/make_tsnr.py func.nii.gz
-
 # remove big unnecesary files
 rm 1st_cleaning/mc/prefiltered_func_data_mcf.nii.gz
+
+echo create_qa_plots
+python $inputDir/plotting.py . $inputDir/plot_config.txt
 
 # run fix, create features
 $fix -f ./1st_cleaning
