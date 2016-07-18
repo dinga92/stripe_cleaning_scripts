@@ -60,7 +60,7 @@ def plot_motion_params(mc_par, mc_abs, title = ""):
 
 
 #f = open(sys.argv[1])
-#folder = '110553'
+#folder = 'Output/110553'
 #plot_config = 'plot_config.txt'
 
 folder = sys.argv[1]
@@ -97,8 +97,8 @@ for line in f:
 
     if elements[0].endswith('/mc\n'): # plot motion params
         path = elements[0][:-1] #everything except '\n'
-        mc_par = opj(path, 'prefiltered_func_data_mcf.par')
-        mc_abs = opj(path, 'prefiltered_func_data_mcf_abs.rms')
+        mc_par = opj(folder, path, 'prefiltered_func_data_mcf.par')
+        mc_abs = opj(folder, path, 'prefiltered_func_data_mcf_abs.rms')
         display = plot_motion_params(mc_par, mc_abs)
         #fig.savefig('params')
 
