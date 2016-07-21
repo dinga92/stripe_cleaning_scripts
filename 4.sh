@@ -1,9 +1,9 @@
 # this script will take cleaned data from the first cleaning, motion correct them, run melodic and create features for FIX
-
+inputDir=/home/data/lschmaal/Richard/stripe_cleaning/Output
 SUBJID=$1
-TR=$(grep $SUBJID ./TRs.txt | awk 'NF>1{print $NF}')
+TR=$(grep $SUBJID ${inputDir}/TRs.txt | awk 'NF>1{print $NF}')
 FSLBIN=$FSLDIR/bin
-fix=/home/dlpfc/Code/FIX/fix1.06/fix
+#fix=/home/dlpfc/Code/FIX/fix1.06/fix
 
 cd $SUBJID
 mkdir 2nd_cleaning
@@ -21,7 +21,7 @@ echo get_example
 all_vol=`${FSLBIN}/fslinfo cleaned_data.nii.gz | grep dim4 | head -n 1 | awk '{print $2}'`
 all_vol=${all_vol}
 middle_vol=`echo $all_vol / 2 | bc`
-${FSLBIN}/fslroi cleaneed_data.nii.gz example_func ${middle_vol} 1
+${FSLBIN}/fslroi cleaned_data.nii.gz example_func ${middle_vol} 1
 echo
 
 
@@ -48,7 +48,7 @@ if [ ! -f $melodic_in ]; then
     exit
 fi
 
-${FSLBIN}/melodic --in=$melodic_in --outdir=filtered_func_data.ica --nobet --mmthresh=0.5 --report --tr=${TR} --Oall
+${FSLBIN}/melodic --in=$melodic_in --outdir=filtered_func_data.ica --nobet --mmthresh=0.5 --tr=${TR} --Oall
 
 echo create_links
 #create links to additional files required for fix that were allready created by 1.sh

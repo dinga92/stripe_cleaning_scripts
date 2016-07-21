@@ -3,7 +3,7 @@
 # it needs files created by 1.sh script and a text file with numbers of noise components 
 
 #FIX path
-fix=/home/dlpfc/Code/FIX/fix1.06/fix
+#fix=/home/dlpfc/Code/FIX/fix1.06/fix
 
 # read text file with subjects numbers one per line
 subjects_file=$1
