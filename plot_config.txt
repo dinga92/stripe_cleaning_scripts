@@ -1,5 +1,5 @@
 # plot motion
-110553/1st_cleaning/mc
+1st_cleaning/mc
 
 # func mask
 mean_func.nii.gz x 4 add_contours mask.nii.gz
