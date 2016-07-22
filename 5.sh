@@ -1,11 +1,11 @@
 # this script will run rest of the preprocessing pipeline and first level FEAT after the data were cleaned
 
 SUBJID=$1
-TR=$(grep $SUBJID ./TRs.txt | awk 'NF>1{print $NF}')
+TR=$(grep $SUBJID $inputDir/TRs.txt | awk 'NF>1{print $NF}')
 
-FSLBIN=$FSLDIR/bin
-python=python
-ICA_AROMA=/home/dlpfc/Code/ICA-AROMA-master/ICA_AROMA.py
+#FSLBIN=$FSLDIR/bin
+#python=python
+#ICA_AROMA=/home/dlpfc/Code/ICA-AROMA-master/ICA_AROMA.py
 
 echo $SUBJID
 echo $TR
@@ -14,11 +14,24 @@ cd $SUBJID
 
 echo copy_clean_data
 #change this path to 1st cleaning if only one pass of cleaning was performed
-cp 2nd_cleaning/cleaned_data.nii.gz .
+#cp 2nd_cleaning/cleaned_data.nii.gz .
+
+# run motion correction only if the second cleaning pass was not done before
+echo motioncorrection
+# motion correcitonw as already run in the first step, however we used it only to create motion parameters for fix, we did not actually used realigned data, therefore we will run motion correction again and realign the data now. 
+
+# infile: cleaned_data.nii.gz
+# outfile: prefiltered_func_data_mcf
+mcflirt -in 1st_cleaning/cleaned_data.nii.gz -out prefiltered_func_data_mcf -mats -plots -reffile reg/example_func -rmsrel -rmsabs -stats
+mkdir mc
+mv prefiltered_func_data_mcf* mc/.
+mv mc/prefiltered_func_data_mcf.nii.gz filtered_func_data.nii.gz
+mv filtered_func_data.nii.gz cleaned_data.nii.gz
 echo
 
+
 echo apply_mask
-${FSLBIN}/fslmaths cleaned_data.nii.gz -mul mask.nii.gz ${SUBJID}_func_ss.nii.gz
+fslmaths cleaned_data.nii.gz -mul mask.nii.gz func_ss.nii.gz
 echo
 
 
@@ -26,7 +39,7 @@ echo grandmeanscaling
 # Do Grand Mean Scaling
 # infile: ${SUBJID}_func_ss.nii.gz
 # outfile: ${SUBJID}_func_gm.nii.gz
-${FSLBIN}/fslmaths ${SUBJID}_func_ss.nii.gz -ing 10000 ${SUBJID}_func_gm.nii.gz -odt float
+fslmaths ${SUBJID}_func_ss.nii.gz -ing 10000 ${SUBJID}_func_gm.nii.gz -odt float
 echo
 
 
@@ -34,7 +47,7 @@ echo get_quickmask
 # Make quick mask
 # infile: ${SUBJID}_func_gm.nii.gz
 # outfile: ${SUBJID}_func_gm_mask.nii.gz
-${FSLBIN}/fslmaths ${SUBJID}_func_gm.nii.gz -abs -Tmin -bin ${SUBJID}_func_gm_mask.nii.gz
+fslmaths ${SUBJID}_func_gm.nii.gz -abs -Tmin -bin ${SUBJID}_func_gm_mask.nii.gz
 echo
 
 
@@ -42,7 +55,7 @@ echo spatialsmoothing6
 # Do Spatial Smoothing with FWHM = 6
 # infile: ${SUBJID}_func_gm.nii.gz
 # outfile: ${SUBJID}_func_sm.nii.gz
-${FSLBIN}/fslmaths ${SUBJID}_func_gm.nii.gz -kernel gauss 2.5479870902 -fmean -mas ${SUBJID}_func_gm_mask.nii.gz ${SUBJID}_func_sm.nii.gz
+fslmaths ${SUBJID}_func_gm.nii.gz -kernel gauss 2.5479870902 -fmean -mas ${SUBJID}_func_gm_mask.nii.gz ${SUBJID}_func_sm.nii.gz
 echo
 
 
@@ -61,8 +74,8 @@ echo highpassfilter
 # Do Temporal Filtering
 # infile: ${SUBJID}_func.ica_aroma/denoised_func_data_nonaggr_res.nii.gz
 # outfile: ${SUBJID}_denoised_tempfilt
-${FSLBIN}/fslmaths ${SUBJID}_func.ica_aroma/denoised_func_data_nonaggr.nii.gz -Tmean ${SUBJID}_func.ica_aroma/denoised_func_data_nonaggr_mean.nii.gz
-${FSLBIN}/fslmaths ${SUBJID}_func.ica_aroma/denoised_func_data_nonaggr.nii.gz -bptf 19.46450971062762 -1 -add ${SUBJID}_func.ica_aroma/denoised_func_data_nonaggr_mean.nii.gz ${SUBJID}_denoised_tempfilt 
+fslmaths ${SUBJID}_func.ica_aroma/denoised_func_data_nonaggr.nii.gz -Tmean ${SUBJID}_func.ica_aroma/denoised_func_data_nonaggr_mean.nii.gz
+fslmaths ${SUBJID}_func.ica_aroma/denoised_func_data_nonaggr.nii.gz -bptf 19.46450971062762 -1 -add ${SUBJID}_func.ica_aroma/denoised_func_data_nonaggr_mean.nii.gz ${SUBJID}_denoised_tempfilt 
 echo
 
 
@@ -80,7 +93,7 @@ TEMPLATEDIR=/home/dlpfc/Code/imaging_geest/processing_scripts/Pauls/ToL_pipeline
 # Set some variables
 OUTPUTDIR=${HOME}/fixed_stripes.feat
 DATA=${HOME}/${SUBJID}_denoised_tempfilt.nii.gz 
-vol=`${FSLBIN}/fslnvols ${SUBJID}_denoised_tempfilt.nii.gz`
+vol=`fslnvols ${SUBJID}_denoised_tempfilt.nii.gz`
 VOLUMES=${vol}
 
 EV1=${EVDIR}/step1.txt
@@ -109,7 +122,7 @@ done
 
 #Run feat analysis
 echo 'FEAT denoised soft: run the analysis'
-${FSLBIN}/feat $(pwd)/${SUBJID}_FEAT.fsf 
+feat $(pwd)/${SUBJID}_FEAT.fsf 
 
 
 echo register_stats
@@ -119,7 +132,7 @@ mkdir reg_standard
 mkdir reg_standard/stats
 
 for f in stats/z*.nii.gz stats/t*.nii.gz stats/c*.nii.gz stats/f*.nii.gz stats/var*.nii.gz; do   
-  ${FSLBIN}/applywarp --ref=${FSLDIR}/data/standard/MNI152_T1_2mm --in=${f} --warp=../${SUBJID}_T1_nonlinear_transf.nii.gz --premat=../reg/fMRI_example_func_ns.mat --out=../reg_standard/${f}  ; 
+  applywarp --ref=${FSLDIR}/data/standard/MNI152_T1_2mm --in=${f} --warp=../${SUBJID}_T1_nonlinear_transf.nii.gz --premat=../reg/fMRI_example_func_ns.mat --out=../reg_standard/${f}  ; 
 done
 
 
