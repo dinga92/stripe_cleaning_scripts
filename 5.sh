@@ -37,45 +37,45 @@ echo
 
 echo grandmeanscaling 
 # Do Grand Mean Scaling
-# infile: ${SUBJID}_func_ss.nii.gz
-# outfile: ${SUBJID}_func_gm.nii.gz
-fslmaths ${SUBJID}_func_ss.nii.gz -ing 10000 ${SUBJID}_func_gm.nii.gz -odt float
+# infile: func_ss.nii.gz
+# outfile: func_gm.nii.gz
+fslmaths func_ss.nii.gz -ing 10000 func_gm.nii.gz -odt float
 echo
 
 
 echo get_quickmask 
 # Make quick mask
-# infile: ${SUBJID}_func_gm.nii.gz
-# outfile: ${SUBJID}_func_gm_mask.nii.gz
-fslmaths ${SUBJID}_func_gm.nii.gz -abs -Tmin -bin ${SUBJID}_func_gm_mask.nii.gz
+# infile: func_gm.nii.gz
+# outfile: func_gm_mask.nii.gz
+fslmaths func_gm.nii.gz -abs -Tmin -bin func_gm_mask.nii.gz
 echo
 
 
 echo spatialsmoothing6 
 # Do Spatial Smoothing with FWHM = 6
-# infile: ${SUBJID}_func_gm.nii.gz
-# outfile: ${SUBJID}_func_sm.nii.gz
-fslmaths ${SUBJID}_func_gm.nii.gz -kernel gauss 2.5479870902 -fmean -mas ${SUBJID}_func_gm_mask.nii.gz ${SUBJID}_func_sm.nii.gz
+# infile: func_gm.nii.gz
+# outfile: func_sm.nii.gz
+fslmaths func_gm.nii.gz -kernel gauss 2.5479870902 -fmean -mas func_gm_mask.nii.gz func_sm.nii.gz
 echo
 
 
 echo ica_aroma+melodic
 # Do ICA_AROMA
 # melodic is part of ica_aroma 
-# infile: ${SUBJID}_func_sm.nii.gz
-# outdir: ${SUBJID}_func.ica_aroma
+# infile: func_sm.nii.gz
+# outdir: func.ica_aroma
 #ICA_aroma needs full path for some reason, assuming ${HOME} == working directory
-#/home/common/applications/Python/Python-2.7.8/python /home/data/lschmaal/NESDA_data/ICA-AROMA-master/ICA_AROMA.py -i ${HOME}/${SUBJID}_func_sm.nii.gz -o ${HOME}/${SUBJID}_func.ica_aroma -tr ${TR} -a ${HOME}/${SUBJID}_reg/${SUBJID}_fMRI_example_func_ns2highres.mat -w ${HOME}/${SUBJID}_T1_nonlinear_transf.nii.gz -mc ${HOME}/${SUBJID}_mc/${SUBJID}_func_mc.par  
-$python $ICA_AROMA -i $(pwd)/${SUBJID}_func_sm.nii.gz -o $(pwd)/${SUBJID}_func.ica_aroma -tr ${TR} -a /media/dlpfc/Elements/ICA_smoothed/${SUBJID}/${SUBJID}_reg/${SUBJID}_fMRI_example_func_ns2highres.mat -w /media/dlpfc/Elements/ICA_smoothed/${SUBJID}/${SUBJID}_T1_nonlinear_transf.nii.gz -mc ${source_folder}/mc/prefiltered_func_data_mcf.par
+#/home/common/applications/Python/Python-2.7.8/python /home/data/lschmaal/NESDA_data/ICA-AROMA-master/ICA_AROMA.py -i ${HOME}/func_sm.nii.gz -o ${HOME}/func.ica_aroma -tr ${TR} -a ${HOME}/reg/fMRI_example_func_ns2highres.mat -w ${HOME}/T1_nonlinear_transf.nii.gz -mc ${HOME}/mc/func_mc.par  
+$python $ICA_AROMA -i $(pwd)/func_sm.nii.gz -o $(pwd)/func.ica_aroma -tr ${TR} -a /media/dlpfc/Elements/ICA_smoothed/${SUBJID}/reg/fMRI_example_func_ns2highres.mat -w /media/dlpfc/Elements/ICA_smoothed/${SUBJID}/T1_nonlinear_transf.nii.gz -mc ${source_folder}/mc/prefiltered_func_data_mcf.par
 echo
 
 
 echo highpassfilter 
 # Do Temporal Filtering
-# infile: ${SUBJID}_func.ica_aroma/denoised_func_data_nonaggr_res.nii.gz
-# outfile: ${SUBJID}_denoised_tempfilt
-fslmaths ${SUBJID}_func.ica_aroma/denoised_func_data_nonaggr.nii.gz -Tmean ${SUBJID}_func.ica_aroma/denoised_func_data_nonaggr_mean.nii.gz
-fslmaths ${SUBJID}_func.ica_aroma/denoised_func_data_nonaggr.nii.gz -bptf 19.46450971062762 -1 -add ${SUBJID}_func.ica_aroma/denoised_func_data_nonaggr_mean.nii.gz ${SUBJID}_denoised_tempfilt 
+# infile: func.ica_aroma/denoised_func_data_nonaggr_res.nii.gz
+# outfile: denoised_tempfilt
+fslmaths func.ica_aroma/denoised_func_data_nonaggr.nii.gz -Tmean func.ica_aroma/denoised_func_data_nonaggr_mean.nii.gz
+fslmaths func.ica_aroma/denoised_func_data_nonaggr.nii.gz -bptf 19.46450971062762 -1 -add func.ica_aroma/denoised_func_data_nonaggr_mean.nii.gz denoised_tempfilt 
 echo
 
 
@@ -84,7 +84,7 @@ EVDIR=/home/dlpfc/Code/imaging_geest/processing_scripts/Pauls/ToL_pipelines/0/de
 
 echo 'FEAT: set variables and make a config file'
 # infile: template .fsf file
-# outfile: ${SUBJID}_FEAT.fsf
+# outfile: FEAT.fsf
 
 # First level design
 # Set directories
@@ -92,8 +92,8 @@ TEMPLATEDIR=/home/dlpfc/Code/imaging_geest/processing_scripts/Pauls/ToL_pipeline
 
 # Set some variables
 OUTPUTDIR=${HOME}/fixed_stripes.feat
-DATA=${HOME}/${SUBJID}_denoised_tempfilt.nii.gz 
-vol=`fslnvols ${SUBJID}_denoised_tempfilt.nii.gz`
+DATA=${HOME}/denoised_tempfilt.nii.gz 
+vol=`fslnvols denoised_tempfilt.nii.gz`
 VOLUMES=${vol}
 
 EV1=${EVDIR}/step1.txt
@@ -117,12 +117,12 @@ sed -e 's@#OUTPUTDIR#@'$OUTPUTDIR'@g' \
 -e 's@#EV8#@'$EV8'@g' \
 -e 's@#VOLUMES#@'$VOLUMES'@g' \
 -e 's@#TR#@'$TR'@g' \
--e 's@#DATA#@'$DATA'@g' <$i> $(pwd)/${SUBJID}_FEAT.fsf
+-e 's@#DATA#@'$DATA'@g' <$i> $(pwd)/FEAT.fsf
 done
 
 #Run feat analysis
 echo 'FEAT denoised soft: run the analysis'
-feat $(pwd)/${SUBJID}_FEAT.fsf 
+feat $(pwd)/FEAT.fsf 
 
 
 echo register_stats
@@ -132,7 +132,7 @@ mkdir reg_standard
 mkdir reg_standard/stats
 
 for f in stats/z*.nii.gz stats/t*.nii.gz stats/c*.nii.gz stats/f*.nii.gz stats/var*.nii.gz; do   
-  applywarp --ref=${FSLDIR}/data/standard/MNI152_T1_2mm --in=${f} --warp=../${SUBJID}_T1_nonlinear_transf.nii.gz --premat=../reg/fMRI_example_func_ns.mat --out=../reg_standard/${f}  ; 
+  applywarp --ref=${FSLDIR}/data/standard/MNI152_T1_2mm --in=${f} --warp=../T1_nonlinear_transf.nii.gz --premat=../reg/fMRI_example_func_ns.mat --out=../reg_standard/${f}  ; 
 done
 
 
