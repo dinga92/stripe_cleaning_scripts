@@ -64,8 +64,8 @@ echo ica_aroma+melodic
 # melodic is part of ica_aroma 
 # infile: func_sm.nii.gz
 # outdir: func.ica_aroma
-#ICA_aroma needs full path for some reason, assuming ${HOME} == working directory
-#/home/common/applications/Python/Python-2.7.8/python /home/data/lschmaal/NESDA_data/ICA-AROMA-master/ICA_AROMA.py -i ${HOME}/func_sm.nii.gz -o ${HOME}/func.ica_aroma -tr ${TR} -a ${HOME}/reg/fMRI_example_func_ns2highres.mat -w ${HOME}/T1_nonlinear_transf.nii.gz -mc ${HOME}/mc/func_mc.par  
+#ICA_aroma needs full path for some reason, assuming $(pwd) == working directory
+#/home/common/applications/Python/Python-2.7.8/python /home/data/lschmaal/NESDA_data/ICA-AROMA-master/ICA_AROMA.py -i $(pwd)/func_sm.nii.gz -o $(pwd)/func.ica_aroma -tr ${TR} -a $(pwd)/reg/fMRI_example_func_ns2highres.mat -w $(pwd)/T1_nonlinear_transf.nii.gz -mc $(pwd)/mc/func_mc.par  
 $python $ICA_AROMA -i $(pwd)/func_sm.nii.gz -o $(pwd)/func.ica_aroma -tr ${TR} -a /media/dlpfc/Elements/ICA_smoothed/${SUBJID}/reg/fMRI_example_func_ns2highres.mat -w /media/dlpfc/Elements/ICA_smoothed/${SUBJID}/T1_nonlinear_transf.nii.gz -mc ${source_folder}/mc/prefiltered_func_data_mcf.par
 echo
 
@@ -79,8 +79,7 @@ fslmaths func.ica_aroma/denoised_func_data_nonaggr.nii.gz -bptf 19.4645097106276
 echo
 
 
-
-EVDIR=/home/dlpfc/Code/imaging_geest/processing_scripts/Pauls/ToL_pipelines/0/designs_tol/${SUBJID}
+EVDIR=/home/data/lschmaal/Richard/designs_scaled/${SUBJID}
 
 echo 'FEAT: set variables and make a config file'
 # infile: template .fsf file
@@ -91,19 +90,17 @@ echo 'FEAT: set variables and make a config file'
 TEMPLATEDIR=/home/dlpfc/Code/imaging_geest/processing_scripts/Pauls/ToL_pipelines/0
 
 # Set some variables
-OUTPUTDIR=${HOME}/fixed_stripes.feat
-DATA=${HOME}/denoised_tempfilt.nii.gz 
+OUTPUTDIR=$(pwd)/fixed_stripes.feat
+DATA=$(pwd)/denoised_tempfilt.nii.gz 
 vol=`fslnvols denoised_tempfilt.nii.gz`
 VOLUMES=${vol}
 
-EV1=${EVDIR}/step1.txt
-EV2=${EVDIR}/step2.txt
-EV3=${EVDIR}/step3.txt
-EV4=${EVDIR}/step4.txt
-EV5=${EVDIR}/step5.txt
-EV6=${EVDIR}/baseline1.txt
-EV7=${EVDIR}/baseline2.txt
-EV8=${EVDIR}/false.txt
+EV1=${EVDIR}/angry.txt
+EV2=${EVDIR}/fear.txt
+EV3=${EVDIR}/happy.txt
+EV4=${EVDIR}/neutral.txt
+EV5=${EVDIR}/sad.txt
+EV6=${EVDIR}/baseline.txt
 
 for i in ${TEMPLATEDIR}/design.fsf; do
 sed -e 's@#OUTPUTDIR#@'$OUTPUTDIR'@g' \
@@ -113,8 +110,6 @@ sed -e 's@#OUTPUTDIR#@'$OUTPUTDIR'@g' \
 -e 's@#EV4#@'$EV4'@g' \
 -e 's@#EV5#@'$EV5'@g' \
 -e 's@#EV6#@'$EV6'@g' \
--e 's@#EV7#@'$EV7'@g' \
--e 's@#EV8#@'$EV8'@g' \
 -e 's@#VOLUMES#@'$VOLUMES'@g' \
 -e 's@#TR#@'$TR'@g' \
 -e 's@#DATA#@'$DATA'@g' <$i> $(pwd)/FEAT.fsf
