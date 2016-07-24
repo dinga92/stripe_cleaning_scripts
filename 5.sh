@@ -66,7 +66,7 @@ echo ica_aroma+melodic
 # outdir: func.ica_aroma
 #ICA_aroma needs full path for some reason, assuming $(pwd) == working directory
 #/home/common/applications/Python/Python-2.7.8/python /home/data/lschmaal/NESDA_data/ICA-AROMA-master/ICA_AROMA.py -i $(pwd)/func_sm.nii.gz -o $(pwd)/func.ica_aroma -tr ${TR} -a $(pwd)/reg/fMRI_example_func_ns2highres.mat -w $(pwd)/T1_nonlinear_transf.nii.gz -mc $(pwd)/mc/func_mc.par  
-$python $ICA_AROMA -i $(pwd)/func_sm.nii.gz -o $(pwd)/func.ica_aroma -tr ${TR} -a /media/dlpfc/Elements/ICA_smoothed/${SUBJID}/reg/fMRI_example_func_ns2highres.mat -w /media/dlpfc/Elements/ICA_smoothed/${SUBJID}/T1_nonlinear_transf.nii.gz -mc ${source_folder}/mc/prefiltered_func_data_mcf.par
+python $ICA_AROMA -i $(pwd)/func_sm.nii.gz -o $(pwd)/func.ica_aroma -tr ${TR} -a $(pwd)/reg/fMRI_example_func_ns2highres.mat -w $(pwd)/T1_nonlinear_transf.nii.gz -mc $(pwd)/mc/prefiltered_func_data_mcf.par
 echo
 
 
@@ -87,8 +87,8 @@ echo 'FEAT: set variables and make a config file'
 
 # First level design
 # Set directories
-TEMPLATEDIR=/home/dlpfc/Code/imaging_geest/processing_scripts/Pauls/ToL_pipelines/0
-
+#TEMPLATEDIR=/home/dlpfc/Code/imaging_geest/processing_scripts/Pauls/ToL_pipelines/0
+TEMPLATEDIR=/home/data/lschmaal/Richard/stripe_cleaning/Output
 # Set some variables
 OUTPUTDIR=$(pwd)/fixed_stripes.feat
 DATA=$(pwd)/denoised_tempfilt.nii.gz 
@@ -127,7 +127,7 @@ mkdir reg_standard
 mkdir reg_standard/stats
 
 for f in stats/z*.nii.gz stats/t*.nii.gz stats/c*.nii.gz stats/f*.nii.gz stats/var*.nii.gz; do   
-  applywarp --ref=${FSLDIR}/data/standard/MNI152_T1_2mm --in=${f} --warp=../T1_nonlinear_transf.nii.gz --premat=../reg/fMRI_example_func_ns.mat --out=../reg_standard/${f}  ; 
+  applywarp --ref=${FSLDIR}/data/standard/MNI152_T1_2mm --in=${f} --warp=../T1_nonlinear_transf.nii.gz --premat=../reg/fMRI_example_func_ns2highres.mat --out=../reg_standard/${f}  ; 
 done
 
 
