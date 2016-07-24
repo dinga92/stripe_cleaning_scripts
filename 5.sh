@@ -122,12 +122,26 @@ feat $(pwd)/FEAT.fsf
 
 echo register_stats
 # z*.nii.gz t*.nii.gz c*.nii.gz f*.nii.gz
-cd ${OUTPUTDIR}
 mkdir reg_standard
 mkdir reg_standard/stats
+cd ${OUTPUTDIR}
 
-for f in stats/z*.nii.gz stats/t*.nii.gz stats/c*.nii.gz stats/f*.nii.gz stats/var*.nii.gz; do   
+for f in stats/z*.nii.gz stats/t*.nii.gz stats/c*.nii.gz stats/var*.nii.gz; do   
   applywarp --ref=${FSLDIR}/data/standard/MNI152_T1_2mm --in=${f} --warp=../T1_nonlinear_transf.nii.gz --premat=../reg/fMRI_example_func_ns2highres.mat --out=../reg_standard/${f}  ; 
 done
+
+
+# dealing with unsmoothed data for MVPA purposes
+echo denoise unsmoothed data
+clfs=$(cat func.ica_aroma/classified_motion_ICs.txt)
+fsl_regfilt -i func_gm.nii.gz -o denoised_unsmoothed.nii.gz -d func.ica_aroma/melodic.ica/melodic_mix -f "$clfs"
+
+echo highpass filter
+fslmaths denoised_unsmoothed.nii.gz -Tmean denoised_unsmoothed_mean.nii.gz
+fslmaths denoised_unsmoothed.nii.gz -bptf 19.46450971062762 -1 -add denoised_unsmoothed_mean.nii.gz denoised_unsmoothed_tempfilt 
+echo
+
+echo reg denoised unsmoothed data
+applywarp --ref=${FSLDIR}/data/standard/MNI152_T1_2mm --in=denoised_unsmoothed_tempfilt.nii.gz --warp=T1_nonlinear_transf.nii.gz --premat=reg/fMRI_example_func_ns2highres.mat --out=denoised_unsmoothed_tempfilt_mni.nii.gz
 
 
