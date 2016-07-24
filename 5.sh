@@ -154,4 +154,6 @@ echo create_tsnr
 python $inputDir/make_tsnr.py denoised_unsmoothed_tempfilt.nii.gz
 python $inputDir/make_tsnr.py denoised_tempfilt.nii.gz
 python $inputDir/make_tsnr.py 1st_cleaning/cleaned_data.nii.gz
+mkdir tsnr
+mv $(find . -name '*tsnr*' -type f) tsnr/. 
 echo
