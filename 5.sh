@@ -129,7 +129,7 @@ cd ${OUTPUTDIR}
 for f in stats/z*.nii.gz stats/t*.nii.gz stats/c*.nii.gz stats/var*.nii.gz; do   
   applywarp --ref=${FSLDIR}/data/standard/MNI152_T1_2mm --in=${f} --warp=../T1_nonlinear_transf.nii.gz --premat=../reg/fMRI_example_func_ns2highres.mat --out=../reg_standard/${f}  ; 
 done
-
+cd ..
 
 # dealing with unsmoothed data for MVPA purposes
 echo denoise unsmoothed data
@@ -144,4 +144,8 @@ echo
 echo reg denoised unsmoothed data
 applywarp --ref=${FSLDIR}/data/standard/MNI152_T1_2mm --in=denoised_unsmoothed_tempfilt.nii.gz --warp=T1_nonlinear_transf.nii.gz --premat=reg/fMRI_example_func_ns2highres.mat --out=denoised_unsmoothed_tempfilt_mni.nii.gz
 
-
+echo create_tsnr
+python $inputDir/make_tsnr.py denoised_unsmoothed_tempfilt.nii.gz
+python $inputDir/make_tsnr.py denoised_tempfilt.nii.gz
+python $inputDir/make_tsnr.py 1st_cleaning/cleaned_data.nii.gz
+echo
