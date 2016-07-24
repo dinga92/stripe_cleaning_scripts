@@ -141,8 +141,14 @@ fslmaths denoised_unsmoothed.nii.gz -Tmean denoised_unsmoothed_mean.nii.gz
 fslmaths denoised_unsmoothed.nii.gz -bptf 19.46450971062762 -1 -add denoised_unsmoothed_mean.nii.gz denoised_unsmoothed_tempfilt 
 echo
 
+echo prewhitening
+film_gls --ac --in=denoised_tempfilt.nii.gz --rn=prewhitening --outputPWdata
+echo
+
 echo reg denoised unsmoothed data
 applywarp --ref=${FSLDIR}/data/standard/MNI152_T1_2mm --in=denoised_unsmoothed_tempfilt.nii.gz --warp=T1_nonlinear_transf.nii.gz --premat=reg/fMRI_example_func_ns2highres.mat --out=denoised_unsmoothed_tempfilt_mni.nii.gz
+applywarp --ref=${FSLDIR}/data/standard/MNI152_T1_2mm --in=prewhitening/prewhitened_data --warp=T1_nonlinear_transf.nii.gz --premat=reg/fMRI_example_func_ns2highres.mat --out=denoised_unsmoothed_tempfilt_pw_mni.nii.gz
+echo
 
 echo create_tsnr
 python $inputDir/make_tsnr.py denoised_unsmoothed_tempfilt.nii.gz
