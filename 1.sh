@@ -13,7 +13,6 @@
 # setup variables
 SUBJID=$1
 
-inputDir=/home/data/lschmaal/Richard/stripe_cleaning
 TR=$(grep $SUBJID $inputDir/TRs.txt | awk 'NF>1{print $NF}')
 #func_data=$inputDir/source_data/${SUBJID}/${SUBJID}_func.nii.gz
 #t1_data=$inputDir/source_data/${SUBJID}/${SUBJID}_T1.nii.gz
@@ -55,12 +54,12 @@ if [ ! -f $melodic_in ]; then
     exit
 fi
 
-#melodic --in=$melodic_in --outdir=filtered_func_data.ica --nobet --mmthresh=0.5 --tr=${TR} --Oall
+melodic --in=$melodic_in --outdir=filtered_func_data.ica --nobet --mmthresh=0.5 --tr=${TR} --Oall
 
 # copy file instead of running melodic
-cp $inputDir/source_data/${SUBJID}_script1.tar.bz2 .
-tar -xjf ${SUBJID}_script1.tar.bz2 && rm ${SUBJID}_script1.tar.bz2
-mv ${SUBJID}_func_raw.ica filtered_func_data.ica
+#cp $inputDir/source_data/${SUBJID}_script1.tar.bz2 .
+#tar -xjf ${SUBJID}_script1.tar.bz2 && rm ${SUBJID}_script1.tar.bz2
+#mv ${SUBJID}_func_raw.ica filtered_func_data.ica
 
 echo get_example 
 # Get example_func - i.e. middle volume
@@ -177,6 +176,7 @@ rm 1st_cleaning/mc/prefiltered_func_data_mcf.nii.gz
 echo create_qa_plots
 python $inputDir/plotting.py . $inputDir/plot_config.txt
 
+echo create fix features
 # run fix, create features
 $fix -f ./1st_cleaning
 
