@@ -20,6 +20,11 @@ def load_subj_fmri_data(melodic_oIC_path, mask_path):
     
     
 def load_subj_ica_classifications(clfs_file_path):
+    if not os.path.exists(clfs_file_path):
+        clfs = []
+        print('No classification file was provided, or path was wrong, all components are treated as unclassified')
+        return clfs
+        
     with open(clfs_file_path) as f:
         clfs = f.readlines()[-1]        
     for char in ['[', ']', '\n']:
