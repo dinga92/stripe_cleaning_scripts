@@ -1,0 +1,6 @@
+filtered_func_data.ica
+1, Signal, False
+2, Signal, False
+3, Unclassified Noise, True
+4, Unclassified Noise, True
+[3,4]
