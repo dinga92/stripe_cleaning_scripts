@@ -182,6 +182,7 @@ classifications_file_path = subj_path + '1st_cleaning/fix4melview_1st_fix_thr50.
 melodic_timeseries_path =  subj_path + '1st_cleaning/filtered_func_data.ica/melodic_mix'    
 melodic_powerspectra_path = subj_path + '1st_cleaning/filtered_func_data.ica/melodic_FTmix'
 outcome_folder = subj_path + '1st_cleaning/ica_plots/'
+dpi=60
 print('Plotting figures\nsubjid=%s\nsubj_path=%s\noutcome_folder=%s '%(subjid, subj_path, outcome_folder))
 
 
@@ -217,7 +218,7 @@ for stripe_magnitude, ic in stripe_magnitude_per_ic:
                              ic)         
     file_name = '%s_%s_IC_%s.png' %(subjid, classified, ic+1)
     fig.savefig(outcome_folder + file_name,  
-                bbox_inches='tight')
+                bbox_inches='tight', dpi=dpi)
     plt.close(fig)
     plt.clf()
     
